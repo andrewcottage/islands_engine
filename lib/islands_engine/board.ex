@@ -7,6 +7,39 @@ defmodule IslandsEngine.Board do
     Agent.start_link(fn -> initialized_board() end)
   end
 
+  def get_coordinate(board, key) when is_atom key do
+    Agent.get(board, fn board -> board[key] end)
+  end
+
+  def guess_coordinate(board, key) do
+    get_coordinate(board, key) |> Coordinate.guess()
+  end
+
+  def coordinate_hit?(board, key) do
+    get_coordinate(board, key) |> Coordinate.hit?()
+  end
+
+  def set_coordinate_in_island(board, key, island) do
+    get_coordinate(board, key)
+    |> Coordinate.set_in_island(island)
+  end
+
+  def coordinate_island(board, key) do
+    get_coordinate(board, key)
+    |> Coordinate.island()
+  end
+
+  def to_string(board) do
+    "%{" <> string_body(board) <> "}"
+  end
+
+  defp string_body(board) do
+    Enum.reduce(keys(), "", fn key, acc ->
+      coord = get_coordinate(board, key))
+      acc <> "#{key} => #{Coordinate.to_string(coord)},\n"
+    end)
+  end
+
   defp keys() do
     for letter <- @letters, number <- @numbers do
       String.to_atom("#{letter}#{number}")
